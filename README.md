@@ -10,3 +10,4 @@ kubectl --kubeconfig=/home/ceai/kubeconfig/config-dev -n ceai logs -f deployment
 http://10.252.216.16:3459/
 
 python -m deep_research.run_server_streaming
+ end
