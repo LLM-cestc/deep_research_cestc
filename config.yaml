@@ -1,0 +1,107 @@
+# ============================================================
+#  Deep Research 写作系统配置（无 RAG / 无联网）
+# ============================================================
+
+# --- 模型配置（统一使用同一大模型端点）---
+# 修改 server 为你的实际模型服务地址
+
+deepresearch:
+  name: "model"
+  server: "http://58.19.19.197:9080/deepseek-v32"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+speeddeepresearch:
+  name: "model"
+  server: "http://58.19.19.197:9080/deepseek-v32"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 4096
+
+confidence:
+  name: "model"
+  server: "http://58.19.19.197:9080/deepseek-v32"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 4096
+  score: 0.85
+
+session:
+  name: "model"
+  server: "http://58.19.19.197:9080/deepseek-v32"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+# --- 运行模式 ---
+pattern:
+  select_pattern: "deep_research"
+
+# --- Deep Research 控制参数 ---
+maxhop:
+  max_hops: 4
+  maxepochs: 2
+  norefturn: True
+  turn_on_deepresearch: True
+  deepresearch_max_depth: 2
+  deepresearch_conf_score: 0.85
+  # 用户可配置：总章节数/总字数/递归层数
+  # - 设为 null：使用默认值或让模型自行决定
+  # - 设为正整数：按该约束执行
+  target_total_sections: null
+  target_total_words: null
+  target_recursion_depth: null
+  deepresearch_root_branching: 6
+  deepresearch_child_branching: 3
+  deepresearch_expand_min_chars: 1800
+  deepresearch_max_nodes: 20
+  deepresearch_force_expand_root: false
+  # 性能：两次请求最小间隔（秒）。并行章节时建议 0.2~0.5；易 503 时调高到 1~2
+  # 503 多发时提高到 1~2 秒，降低网关限流触发概率
+  min_request_interval_seconds: 1.2
+  # 同层章节最大并发数（1=串行）
+  chapter_parallel_workers: 1
+  # 章节局部质检：最少字符数（低于此值会触发局部重写）
+  chapter_min_chars: 1000
+  # 章节局部重写最大次数
+  chapter_rewrite_max_retries: 1
+  # 是否启用章节局部质检与局部重写
+  enable_local_chapter_check: true
+  # 是否启用“逐段一致性校验”
+  enable_paragraph_consistency_check: true
+  # 参与一致性校验的最小段落长度
+  paragraph_min_chars: 120
+  # 段落一致性通过比例阈值
+  paragraph_min_pass_ratio: 0.75
+  # 不一致时回退策略：先重生大纲
+  enable_outline_backtrack: true
+  # 仍不一致时可回退：重生主题+大纲
+  enable_topic_backtrack: true
+  # 为 true 时跳过「整合成一篇」的 LLM，直接拼接各章（最快，结构较弱）
+  skip_merge_llm: false
+  # 为 true 时跳过置信度评分与重试
+  skip_confidence_check: true
+  # 为 true 时跳过文末润色（少一次大模型调用）
+  skip_final_polish_llm: false
+  upspeed: False
+  secondconfscore: 0.86
+  thirdconfscore: 0.8
+  turnsession: False
+  historynum: 5
+  session: 1
+  sessionthreshold: 0.6
+  rewrite: False
+  urlmaxnum: 0
+  relativescore: 0.8
+
+# --- 日志 ---
+logging:
+  level: "INFO"
+  file: "app.log"
+
+formatOutput: False
