@@ -1,0 +1,5 @@
+deep_research/bge-base-zh-v1.5/
+__pycache__/
+*.pyc
+.env
+*.log

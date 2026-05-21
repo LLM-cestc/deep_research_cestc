@@ -1,0 +1,195 @@
+tokenizer:
+  name: "/sharedata/mdl/Qwen/Qwen3.6-27B"
+
+# 所有模型统一使用大模型
+safemodel:
+  name: &llm_name "Qwen3.6-27B"
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+deepresearch:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+speeddeepresearch:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+ 
+confidence:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+  score: 0.95
+
+subquestion:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+extractinfo:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+beautifulformat:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+session:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+rewrite:
+  name: *llm_name
+  server: "http://localhost:8000/v1/chat/completions"
+  temperature: 0.1
+  top_p: 0.9
+  repetition_penalty: 1.1
+  max_tokens: 8192
+
+pattern:
+  select_pattern: "deep_thinking"
+  
+maxhop: 
+  max_hops: 4
+  maxepochs: 2
+  urlmaxnum: 10
+  relativescore: 0.8
+  upspeed: False        # 关闭加速（不需要小模型评估）
+  secondconfscore: 0.86
+  thirdconfscore: 0.8
+  norefturn: True       # 外部搜索
+  rewrite: True        # 查询重写
+  turnsession: True  # 会话管理
+  historynum: 5
+  session: 1
+  sessionthreshold: 0.6
+  turn_on_deepresearch: False
+  deepresearch_max_depth: 1
+  deepresearch_conf_score: 0.85
+
+rag:
+  # 召回条数（最终返回结果数，可调）
+  TOP_K: 4
+  # 分数阈值：仅返回 score >= score_threshold 的结果；0=不过滤（score ∈ [0,1]）
+  score_threshold: 0.22
+  # reference_filenames / dense_model 等相对路径均相对 deep_research/ 包目录（与 cwd 无关）
+  reference_filenames:
+    - "references/all_reference.jsonl"
+  # 召回优化：BM25 参数（可选，不写则用默认 1.2 / 0.75）
+  bm25_k1: 1.2
+  bm25_b: 0.75
+  use_dense: true
+  # 稠密 embedding：false=本地/HF 模型（dense_model），true=HTTP API（dense_http_url）
+  use_dense_http: false
+  dense_http_url: "http://10.252.216.22:37755/qwen3-embedding-06b"
+  # HTTP 时请求体里的 model 名，需与服务端注册名一致（服务 ID 为 qwen3-embedding-06b 时模型名为 Qwen3-Embedding-0.6B）
+  dense_http_model: "model"
+  # 本地模式时使用：路径或 HuggingFace id。保持为当前环境已能跑通的本地模型。
+  dense_model: "bge-base-zh-v1.5"
+  dense_device: "cuda:7"
+  # 首次全量建库时多卡并行编码；建完会写入 references/.dense_cache，后续直接读缓存。
+  dense_encode_devices:
+    - "cuda:0"
+    - "cuda:1"
+    - "cuda:2"
+    - "cuda:3"
+    - "cuda:4"
+    - "cuda:5"
+    - "cuda:6"
+    - "cuda:7"
+  dense_batch_size: 128
+  dense_top_k: 30
+  # BM25 候选预过滤：低于最高分 * 此比例的 BM25 候选直接丢弃（0=不过滤）
+  bm25_min_score_ratio: 0.15
+  # 加权融合：BM25 归一化分 × bm25_weight + dense 归一化分 × dense_weight
+  # 仅出现在一路的文档总分再乘 single_channel_penalty，压低无关召回
+  bm25_weight: 0.3
+  dense_weight: 0.7
+  single_channel_penalty: 0.5
+
+web:
+  enabled: true
+  # Bing：cn.bing.com HTML；Baidu：www.baidu.com HTML（与 Bing 相同策略：免 Key、直连）；Google：仅 SerpAPI。
+  provider: "html_scrape"
+  search_engine: ""
+  engine_order:
+    - "baidu"
+    - "bing"
+    # - "google"
+  search_merge_engines: false
+  search_request_timeout: 25
+  # 机房访问 SerpAPI 时可与 curl 一致；Bing/Baidu 仍直连不走此代理
+  # search_proxy: "http://127.0.0.1:7897"
+  search_sleep_min: 1.0
+  search_sleep_max: 2.0
+  search_round_retries: 2
+  search_round_cooldown_s: 4.0
+  # SerpAPI：Google 唯一路径；也可留空 key 仅用环境变量 SERPAPI_API_KEY
+  serpapi_api_key: "c69c84080032485f92479acc5b18c81f0c83f0bd708a48411574d7ecc9386334"
+  serpapi_key_env: "SERPAPI_API_KEY"
+  serpapi_url: "https://serpapi.com/search.json"
+  # YAML 列表不能为空键：若无域名请写 []，不能只留注释否则会解析成 null 导致 Pydantic 报错
+  trusted_domains: []
+  # 需要限制可信站时再取消注释写入，例如：
+  # trusted_domains:
+  #   - "npc.gov.cn"
+  #   - "court.gov.cn"
+  enforce_trusted_domains: false
+  query_model_enabled: true
+  max_queries: 5
+  max_search_results: 10
+  max_fetch_pages: 5
+  max_evidence_items: 5
+  max_chunks_per_page: 3
+  chunk_size: 800
+  chunk_overlap: 120
+  request_timeout: 10
+  title_score_threshold: 1.0
+  min_content_length: 300
+  # title_then_full：先用标题+摘要筛高相关 URL，再抓取整页正文（超长截断）送模型，不做切块竞争
+  evidence_mode: "title_then_full"
+  full_page_max_chars: 16000
+  max_full_page_items: 5
+  full_page_min_score: 0.35
+  # 入选页统一由 extractinfo 模型：判断重要段落、摘录原文、剔除无关并控制超长
+  page_summary_enabled: true
+  page_summary_max_input_chars: 16000
+  page_summary_max_output_chars: 4500
+  page_summary_parallel: 3
+  page_summary_timeout: 120
+
+logging:
+  level: "INFO"
+  file: "app.log"
+
+formatOutput: False
+
